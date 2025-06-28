@@ -112,6 +112,11 @@ macro_rules! events {
 }
 
 events! {
+    /// Inquiry Complete event [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-cde759f8-6c4d-2dd4-7053-1657125ded74)
+    struct InquiryComplete(0x01) {
+        status: Status,
+    }
+
     /// Disconnection Complete event [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-332adb1f-b5ac-5289-82a2-c51a59d533e7)
     struct DisconnectionComplete(0x05) {
         status: Status,
@@ -249,6 +254,26 @@ events! {
         bd_addr: BdAddr,
         link_type: u8,
         encryption_enabled: u8,
+    }
+
+    /// Connection Request event [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-3115f164-ffcd-9451-09ef-0ed3809889eb)
+    struct ConnectionRequest(0x04) {
+        bd_addr: BdAddr,
+        class_of_device: [u8; 3],
+        link_type: u8,
+    }
+
+    /// Synchronous Connection Complete event [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-a625aef5-c3d7-12e9-39e4-b8f3386150bb)
+    struct SynchronousConnectionComplete(0x2c) {
+        status: Status,
+        handle: ConnHandle,
+        bd_addr: BdAddr,
+        link_type: u8,
+        transmission_interval: u8,
+        retransmission_window: u8,
+        rx_packet_length: u16,
+        tx_packet_length: u16,
+        air_mode: u8,
     }
 
     /// Link Key Request event [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-58400663-f69d-a482-13af-ec558a3f4c03)

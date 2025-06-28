@@ -1,7 +1,7 @@
 //! Informational parameters [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-42372304-c9ef-dcab-6905-4e5b64703d45)
 
 use super::cmd;
-use crate::param::{BdAddr, CmdMask, CoreSpecificationVersion, LmpFeatureMask};
+use crate::param::{BdAddr, CmdMask, CoreSpecificationVersion, LmpFeatureMask, ReadBufferSizeReturn};
 
 cmd! {
     /// Read Local Version Information command [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-cf7fef88-faa4-fd2e-7c00-ab1ec7985a19)
@@ -38,5 +38,13 @@ cmd! {
     ReadBdAddr(INFO_PARAMS, 0x0009) {
         Params = ();
         Return = BdAddr;
+    }
+}
+
+cmd! {
+    /// Read Buffer Size command [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-c6177e5d-1234-f218-d460-a4767b4e3a3f)
+    ReadBufferSize(INFO_PARAMS, 0x0005) {
+        Params = ();
+        Return = ReadBufferSizeReturn;
     }
 }
