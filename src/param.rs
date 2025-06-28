@@ -350,6 +350,16 @@ param! {
 }
 
 param! {
+    /// Return parameters for Read Buffer Size command
+    struct ReadBufferSizeReturn {
+        acl_data_packet_length: u16,
+        synchronous_data_packet_length: u8,
+        total_num_acl_data_packets: u16,
+        total_num_synchronous_data_packets: u16,
+    }
+}
+
+param! {
     /// Parameters for Remote Name Request command
     struct RemoteNameRequestParams {
         bd_addr: BdAddr,
