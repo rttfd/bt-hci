@@ -42,3 +42,7 @@ postcard = "1.1"
 
 [workspace]
 members = ["update_uuids"]
+
+[patch.crates-io]
+embassy-sync = { git = "https://github.com/rttfd/embassy.git", branch = "renik" }
+embassy-time = { git = "https://github.com/rttfd/embassy.git", branch = "renik" }

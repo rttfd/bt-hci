@@ -225,7 +225,7 @@ where
     async fn exec(&self, cmd: &C) -> Result<C::Return, cmd::Error<Self::Error>> {
         let mut retval: C::ReturnBuf = C::ReturnBuf::new();
 
-        //info!("Executing command with opcode {}", C::OPCODE);
+        info!("Executing command with opcode {}", C::OPCODE);
         let (slot, idx) = self.slots.acquire(C::OPCODE, retval.as_mut()).await;
         let _d = OnDrop::new(|| {
             self.slots.release_slot(idx);
@@ -241,8 +241,9 @@ where
             cmd_opcode: C::OPCODE,
             return_param_bytes,
         };
+        info!("Processing command complete event for opcode {}", C::OPCODE);
         let r = e.to_result::<C>().map_err(cmd::Error::Hci)?;
-        // info!("Done executing command with opcode {}", C::OPCODE);
+        info!("Done executing command with opcode {}", C::OPCODE);
         Ok(r)
     }
 }
