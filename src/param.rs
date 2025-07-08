@@ -350,6 +350,17 @@ param! {
 }
 
 param! {
+    /// Return parameters for Read Buffer Size command
+    struct ReadBufferSizeReturn {
+        status: Status,
+        acl_data_packet_length: u16,
+        synchronous_data_packet_length: u8,
+        total_num_acl_data_packets: u16,
+        total_num_synchronous_data_packets: u16,
+    }
+}
+
+param! {
     /// Parameters for Remote Name Request command
     struct RemoteNameRequestParams {
         bd_addr: BdAddr,
@@ -377,6 +388,14 @@ param! {
         bd_addr: BdAddr,
         pin_code_len: u8,
         pin_code: [u8; 16],
+    }
+}
+
+param! {
+    /// Return parameters for commands that return a status and a Bluetooth device address
+    struct StatusBdAddrReturn {
+        status: Status,
+        bd_addr: BdAddr,
     }
 }
 
