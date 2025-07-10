@@ -200,6 +200,87 @@ param! {
 }
 
 param! {
+    enum ConnectionLinkType {
+        /// SCO connection
+        Sco = 0x00,
+        /// ACL connection (Data Channels)
+        Acl = 0x01,
+        /// eSCO connection (Enhanced Data Channels)
+        EnhancedSco = 0x02,
+        // All other values reserved for future use
+    }
+}
+
+param! {
+    enum LmpMaxSlots{
+        /// 1 slot
+        OneSlot = 0x01,
+        /// 3 slots
+        ThreeSlots = 0x03,
+        /// 5 slots
+        FiveSlots = 0x05,
+    }
+}
+
+param! {
+    enum LinkKeyType {
+        /// Combination Key
+        CombinationKey = 0x00,
+        /// Debug Combination Key
+        DebugCombinationKey = 0x03,
+        /// Unauthenticated Combination Key generated from P-192
+        UnauthenticatedCombinationKeyP192 = 0x04,
+        /// Authenticated Combination Key generated from P-192
+        AuthenticatedCombinationKeyP192 = 0x05,
+        /// Changed Combination Key
+        ChangedCombinationKey = 0x06,
+        /// Unauthenticated Combination Key generated from P-256
+        UnauthenticatedCombinationKeyP256 = 0x07,
+        /// Authenticated Combination Key generated from P-256
+        AuthenticatedCombinationKeyP256 = 0x08,
+        // All other values reserved for future use
+    }
+}
+
+param! {
+    enum FlowDirection {
+        /// Outgoing Flow i.e., traffic sent over the ACL connection
+        Outgoing = 0x00,
+        /// Incoming Flow i.e., traffic received over the ACL connection
+        Incoming = 0x01,
+        // All other values reserved for future use
+    }
+}
+
+param! {
+    enum ServiceType {
+        /// No Traffic
+        NoTraffic = 0x00,
+        /// Best Effort
+        BestEffort = 0x01,
+        /// Guaranteed
+        Guaranteed = 0x02,
+        // All other values reserved for future use
+    }
+}
+
+param! {
+    enum NotificationType {
+        /// Passkey entry started
+        PasskeyEntryStarted = 0x00,
+        /// Passkey digit entered
+        PasskeyDigitEntered = 0x01,
+        /// Passkey digit erased
+        PasskeyDigitErased = 0x02,
+        /// Passkey cleared
+        PasskeyCleared = 0x03,
+        /// Passkey entry completed
+        PasskeyEntryCompleted = 0x04,
+        // All other values reserved for future use
+    }
+}
+
+param! {
     /// Common return parameters for commands that return a status and a Bluetooth device address
     struct StatusBdAddrReturn {
         status: Status,

@@ -833,7 +833,7 @@ mod tests {
 
     #[test]
     fn test_user_passkey_request_reply_command() {
-        let _cmd = UserPasskeyRequestReply::new(BdAddr::new([0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc]), 123456);
+        let _cmd = UserPasskeyRequestReply::new(BdAddr::new([0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc]), 123_456);
 
         assert_eq!(UserPasskeyRequestReply::OPCODE.group(), OGF);
         assert_eq!(UserPasskeyRequestReply::OPCODE.cmd(), 0x002e);
