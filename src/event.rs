@@ -3,7 +3,7 @@
 use crate::cmd::{Opcode, SyncCmd};
 use crate::param::{
     param, BdAddr, ClockOffset, ConnHandle, ConnHandleCompletedPackets, ConnectionLinkType, CoreSpecificationVersion,
-    Error, LinkKeyType, LinkType, LmpFeatureMask, PageScanRepetitionMode, RemainingBytes, Status,
+    Error, KeyFlag, LinkKeyType, LinkType, LmpFeatureMask, PageScanRepetitionMode, RemainingBytes, ServiceType, Status,
 };
 use crate::{AsHciBytes, FromHciBytes, FromHciBytesError, ReadHci, ReadHciError};
 
@@ -134,6 +134,13 @@ events! {
         encryption_enabled: bool,
     }
 
+    /// Connection Request event [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-3115f164-ffcd-9451-09ef-0ed3809889eb)
+    struct ConnectionRequest(0x04) {
+        bd_addr: BdAddr,
+        class_of_device: [u8; 3],
+        link_type: ConnectionLinkType,
+    }
+
     /// Disconnection Complete event [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-332adb1f-b5ac-5289-82a2-c51a59d533e7)
     struct DisconnectionComplete(0x05) {
         status: Status,
@@ -161,6 +168,26 @@ events! {
         enabled: bool,
     }
 
+    /// Change Connection Link Key Complete event [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-8d639c74-ec4f-24e3-4e39-952ce11fba57)
+    struct ChangeConnectionLinkKeyComplete(0x09) {
+        status: Status,
+        handle: ConnHandle,
+    }
+
+    /// Link Key Type Changed event [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-9eb2cea6-248a-e017-2c09-2797aba08cbf)
+    struct LinkKeyTypeChanged(0x0a) {
+        status: Status,
+        handle: ConnHandle,
+        key_flag: KeyFlag,
+    }
+
+    /// Read Remote Supported Features Complete event [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-e191dc19-453a-d0e0-2317-2406ffc4d512)
+    struct ReadRemoteSupportedFeaturesComplete(0x0b) {
+        status: Status,
+        handle: ConnHandle,
+        lmp_features: LmpFeatureMask,
+    }
+
     /// Read Remote Version Information Complete event [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-81ed98a1-98b1-dae5-a3f5-bb7bc69d39b7)
     struct ReadRemoteVersionInformationComplete(0x0c) {
         status: Status,
@@ -168,6 +195,18 @@ events! {
         version: CoreSpecificationVersion,
         company_id: u16,
         subversion: u16,
+    }
+
+    /// QoS Setup Complete event [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-7.7.13)
+    struct QosSetupComplete(0x0d) {
+        status: Status,
+        handle: ConnHandle,
+        unused: u8,
+        service_type: ServiceType,
+        token_rate: u32,
+        peak_bandwidth: u32,
+        latency: u32,
+        delay_variation: u32,
     }
 
     /// Command Complete event [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-76d31a33-1a9e-07bc-87c4-8ebffee065fd)
@@ -651,6 +690,185 @@ mod tests {
         let (evt, rest) = UserConfirmationRequest::from_hci_bytes(&data).unwrap();
         assert_eq!(evt.bd_addr.raw(), [1, 2, 3, 4, 5, 6]);
         assert_eq!(evt.numeric_value, 0x1234_5678);
+        assert!(rest.is_empty());
+    }
+
+    #[test]
+    fn test_qos_setup_complete() {
+        let data = [
+            0x00, // status (Success)
+            0x01, 0x00, // handle (0x0001)
+            0x00, // unused
+            0x02, // service_type (Guaranteed)
+            0x00, 0x1f, 0x00, 0x00, // token_rate (8000)
+            0x00, 0x1f, 0x00, 0x00, // peak_bandwidth (8000)
+            0x0a, 0x00, 0x00, 0x00, // latency (10 microseconds)
+            0x14, 0x00, 0x00, 0x00, // delay_variation (20 microseconds)
+        ];
+        let (evt, rest) = QosSetupComplete::from_hci_bytes(&data).unwrap();
+        assert_eq!(evt.status, Status::SUCCESS);
+        assert_eq!(evt.handle.raw(), 0x0001);
+        assert_eq!(evt.unused, 0x00);
+        assert_eq!(evt.service_type, ServiceType::Guaranteed);
+        assert_eq!(evt.token_rate, 8000);
+        assert_eq!(evt.peak_bandwidth, 8000);
+        assert_eq!(evt.latency, 10);
+        assert_eq!(evt.delay_variation, 20);
+        assert!(rest.is_empty());
+    }
+
+    #[test]
+    fn test_inquiry_complete() {
+        let data = [0x00]; // status (Success)
+        let (evt, rest) = InquiryComplete::from_hci_bytes(&data).unwrap();
+        assert_eq!(evt.status, Status::SUCCESS);
+        assert!(rest.is_empty());
+    }
+
+    #[test]
+    fn test_connection_complete() {
+        let data = [
+            0x00, // status (Success)
+            0x01, 0x00, // handle (0x0001)
+            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, // bd_addr
+            0x01, // link_type (ACL)
+            0x01, // encryption_enabled (true)
+        ];
+        let (evt, rest) = ConnectionComplete::from_hci_bytes(&data).unwrap();
+        assert_eq!(evt.status, Status::SUCCESS);
+        assert_eq!(evt.handle.raw(), 0x0001);
+        assert_eq!(evt.bd_addr.as_hci_bytes(), &[0x01, 0x02, 0x03, 0x04, 0x05, 0x06]);
+        assert_eq!(evt.link_type, ConnectionLinkType::Acl);
+        assert_eq!(evt.encryption_enabled, true);
+        assert!(rest.is_empty());
+    }
+
+    #[test]
+    fn test_connection_request() {
+        let data = [
+            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, // bd_addr
+            0x20, 0x04, 0x00, // class_of_device
+            0x01, // link_type (ACL)
+        ];
+        let (evt, rest) = ConnectionRequest::from_hci_bytes(&data).unwrap();
+        assert_eq!(evt.bd_addr.as_hci_bytes(), &[0x01, 0x02, 0x03, 0x04, 0x05, 0x06]);
+        assert_eq!(evt.class_of_device, [0x20, 0x04, 0x00]);
+        assert_eq!(evt.link_type, ConnectionLinkType::Acl);
+        assert!(rest.is_empty());
+    }
+
+    #[test]
+    fn test_disconnection_complete() {
+        let data = [
+            0x00, // status (Success)
+            0x01, 0x00, // handle (0x0001)
+            0x13, // reason (Remote User Terminated Connection)
+        ];
+        let (evt, rest) = DisconnectionComplete::from_hci_bytes(&data).unwrap();
+        assert_eq!(evt.status, Status::SUCCESS);
+        assert_eq!(evt.handle.raw(), 0x0001);
+        assert_eq!(evt.reason, Status::REMOTE_USER_TERMINATED_CONNECTION);
+        assert!(rest.is_empty());
+    }
+
+    #[test]
+    fn test_authentication_complete() {
+        let data = [
+            0x00, // status (Success)
+            0x01, 0x00, // handle (0x0001)
+        ];
+        let (evt, rest) = AuthenticationComplete::from_hci_bytes(&data).unwrap();
+        assert_eq!(evt.status, Status::SUCCESS);
+        assert_eq!(evt.handle.raw(), 0x0001);
+        assert!(rest.is_empty());
+    }
+
+    #[test]
+    fn test_encryption_change_v1() {
+        let data = [
+            0x00, // status (Success)
+            0x01, 0x00, // handle (0x0001)
+            0x01, // enabled (true)
+        ];
+        let (evt, rest) = EncryptionChangeV1::from_hci_bytes(&data).unwrap();
+        assert_eq!(evt.status, Status::SUCCESS);
+        assert_eq!(evt.handle.raw(), 0x0001);
+        assert_eq!(evt.enabled, true);
+        assert!(rest.is_empty());
+    }
+
+    #[test]
+    fn test_command_complete() {
+        let data = [
+            0x01, // num_hci_cmd_pkts
+            0x01, 0x10, // cmd_opcode (Read Local Version Information)
+            0x00, // status (Success)
+            0x09, 0x00, 0x01, 0x02, 0x03, 0x04, // return_param_bytes (sample data)
+        ];
+        let (evt, rest) = CommandComplete::from_hci_bytes(&data).unwrap();
+        assert_eq!(evt.num_hci_cmd_pkts, 1);
+        assert_eq!(evt.cmd_opcode.raw(), 0x1001);
+        assert_eq!(evt.status, Status::SUCCESS);
+        assert_eq!(
+            evt.return_param_bytes.as_hci_bytes(),
+            &[0x09, 0x00, 0x01, 0x02, 0x03, 0x04]
+        );
+        assert!(rest.is_empty());
+    }
+
+    #[test]
+    fn test_command_status() {
+        let data = [
+            0x00, // status (Success)
+            0x01, // num_hci_cmd_pkts
+            0x05, 0x10, // cmd_opcode (Create Connection)
+        ];
+        let (evt, rest) = CommandStatus::from_hci_bytes(&data).unwrap();
+        assert_eq!(evt.status, Status::SUCCESS);
+        assert_eq!(evt.num_hci_cmd_pkts, 1);
+        assert_eq!(evt.cmd_opcode.raw(), 0x1005);
+        assert!(rest.is_empty());
+    }
+
+    #[test]
+    fn test_hardware_error() {
+        let data = [0x42]; // hardware_code
+        let (evt, rest) = HardwareError::from_hci_bytes(&data).unwrap();
+        assert_eq!(evt.hardware_code, 0x42);
+        assert!(rest.is_empty());
+    }
+
+    #[test]
+    fn test_pin_code_request() {
+        let data = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06]; // bd_addr
+        let (evt, rest) = PinCodeRequest::from_hci_bytes(&data).unwrap();
+        assert_eq!(evt.bd_addr.as_hci_bytes(), &[0x01, 0x02, 0x03, 0x04, 0x05, 0x06]);
+        assert!(rest.is_empty());
+    }
+
+    #[test]
+    fn test_link_key_request() {
+        let data = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06]; // bd_addr
+        let (evt, rest) = LinkKeyRequest::from_hci_bytes(&data).unwrap();
+        assert_eq!(evt.bd_addr.as_hci_bytes(), &[0x01, 0x02, 0x03, 0x04, 0x05, 0x06]);
+        assert!(rest.is_empty());
+    }
+
+    #[test]
+    fn test_link_key_notification() {
+        let data = [
+            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, // bd_addr
+            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
+            0x10, // link_key
+            0x06, // key_type (Authenticated P-256)
+        ];
+        let (evt, rest) = LinkKeyNotification::from_hci_bytes(&data).unwrap();
+        assert_eq!(evt.bd_addr.as_hci_bytes(), &[0x01, 0x02, 0x03, 0x04, 0x05, 0x06]);
+        assert_eq!(
+            evt.link_key,
+            [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10]
+        );
+        assert_eq!(evt.key_type, LinkKeyType::AuthenticatedP256);
         assert!(rest.is_empty());
     }
 }

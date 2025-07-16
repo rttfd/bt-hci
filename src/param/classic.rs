@@ -291,3 +291,15 @@ param! {
         retransmission_effort: RetransmissionEffort,
     }
 }
+
+param! {
+    /// QoS Service Type values
+    enum ServiceType {
+        /// No Traffic Available
+        NoTraffic = 0x00,
+        /// Best Effort Available
+        BestEffort = 0x01,
+        /// Guaranteed Available
+        Guaranteed = 0x02,
+    }
+}
