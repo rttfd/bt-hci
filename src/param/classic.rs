@@ -367,6 +367,20 @@ param! {
 }
 
 param! {
+    enum HoldModeActivity {
+        /// Maintain current Power State.
+        MaintainCurrentPowerState = 0x00,
+        /// Suspend Page Scan.
+        SuspendPageScan = 0x01,
+        /// Suspend Inquiry Scan.
+        SuspendInquiryScan = 0x02,
+        /// Suspend Periodic Inquiries.
+        SuspendPeriodicInquiries = 0x04,
+        // All other values reserved for future use
+    }
+}
+
+param! {
     /// Separate params for the Enhanced Setup Synchronous Connection command since they have too many fields
     struct EnhancedSetupSynchronousConnectionParams {
         handle: ConnHandle,

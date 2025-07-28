@@ -5,7 +5,7 @@ extern crate alloc;
 use crate::cmd;
 use crate::param::{
     BdAddr, ConnHandle, ConnHandleCompletedPackets, ControllerToHostFlowControl, Duration, EventMask, EventMaskPage2,
-    FilterConditionType, FilterType, PinType, PowerLevelKind, ScanEnableType,
+    FilterConditionType, FilterType, HoldModeActivity, PinType, PowerLevelKind, ScanEnableType,
 };
 
 // Ox001 - 0x00f
@@ -247,6 +247,118 @@ cmd! {
 // 0x020 - 0x02f
 
 cmd! {
+    /// Write Authentication Enable command [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-85607c64-d1ac-760a-2691-f36d0ba1a319)
+    WriteAuthenticationEnable(CONTROL_BASEBAND, 0x0020) {
+        WriteAuthenticationEnableParams {
+            enable: bool,
+        }
+        Return = ();
+    }
+}
+
+cmd! {
+    /// Read Class of Device command [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-5ddde6f6-210f-56b3-44d1-6671e7e020d0)
+    ReadClassOfDevice(CONTROL_BASEBAND, 0x0023) {
+        Params = ();
+        ReadClassOfDeviceReturn {
+            class_of_device: [u8; 3],
+        }
+    }
+}
+
+cmd! {
+    /// Write Class of Device command [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-eb325a36-addc-2981-2d68-a8d7412caed4)
+    WriteClassOfDevice(CONTROL_BASEBAND, 0x0024) {
+        WriteClassOfDeviceParams {
+            class_of_device: [u8; 3],
+        }
+        Return = ();
+    }
+}
+
+cmd! {
+    /// Read Voice Setting command [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-b8c86c7c-eaf2-a68b-d759-be8ead6f1a0b)
+    ReadVoiceSetting(CONTROL_BASEBAND, 0x0025) {
+        Params = ();
+        ReadVoiceSettingReturn {
+            voice_setting: u16,
+        }
+    }
+}
+
+cmd! {
+    /// Write Voice Setting command [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-a3585d93-bec9-bc42-56d6-a88dc87051d7)
+    WriteVoiceSetting(CONTROL_BASEBAND, 0x0026) {
+        WriteVoiceSettingParams {
+            voice_setting: u16,
+        }
+        Return = ();
+    }
+}
+
+cmd! {
+    /// Read Automatic Flush Timeout command [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-824ff95f-096b-4a4e-c2b2-ac733bceabb7)
+    ReadAutomaticFlushTimeout(CONTROL_BASEBAND, 0x0027) {
+        Params = ConnHandle;
+        ReadAutomaticFlushTimeoutReturn {
+            handle: ConnHandle,
+            flush_timeout: u16,
+        }
+    }
+}
+
+cmd! {
+    /// Write Automatic Flush Timeout command [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-ecb36228-9174-86e0-042b-5cc8f20ab803)
+    WriteAutomaticFlushTimeout(CONTROL_BASEBAND, 0x0028) {
+        WriteAutomaticFlushTimeoutParams {
+            handle: ConnHandle,
+            flush_timeout: u16,
+        }
+        Return = ConnHandle;
+    }
+}
+
+cmd! {
+    /// Read Num Broadcast Retransmissions command [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-21fce9f8-af19-b35e-06c2-e9d7052682f0)
+    ReadNumBroadcastRetransmissions(CONTROL_BASEBAND, 0x0029) {
+        Params = ();
+        ReadNumBroadcastRetransmissionsReturn {
+            num: u8,
+        }
+    }
+}
+
+cmd! {
+    /// Write Num Broadcast Retransmissions command [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-e3a24dfb-c828-0727-118e-b888b47557a9)
+    WriteNumBroadcastRetransmissions(CONTROL_BASEBAND, 0x002a) {
+        WriteNumBroadcastRetransmissionsParams {
+            num: u8,
+        }
+        Return = ();
+    }
+}
+
+cmd! {
+    /// Read Hold Mode Activity command [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-de928202-0a07-f41d-5271-32355b423850)
+    ReadHoldModeActivity(CONTROL_BASEBAND, 0x002b) {
+        Params = ();
+        ReadHoldModeActivityReturn {
+            mode: HoldModeActivity,
+        }
+    }
+}
+
+cmd! {
+    /// Write Hold Mode Activity command [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-df5e8726-090a-3e5d-81de-fe4ed419030f)
+    WriteHoldModeActivity(CONTROL_BASEBAND, 0x002c) {
+        WriteHoldModeActivityParams {
+            mode: HoldModeActivity,
+        }
+        Return = ();
+    }
+}
+
+cmd! {
     /// Read Transmit Power Level command [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-7205a3ee-15c7-cc48-c512-a959b4e3f560)
     ReadTransmitPowerLevel(CONTROL_BASEBAND, 0x002d) {
         ReadTransmitPowerLevelParams {
@@ -256,6 +368,26 @@ cmd! {
             tx_power_level: i8,
         }
         Handle = handle: ConnHandle;
+    }
+}
+
+cmd! {
+    /// Read Synchronous Flow Control Enable command [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-81256228-a647-9e30-b5f5-ca61a6447fc6)
+    ReadSynchronousFlowControlEnable(CONTROL_BASEBAND, 0x002e) {
+        Params = ();
+        ReadSynchronousFlowControlEnableReturn {
+            enable: bool,
+        }
+    }
+}
+
+cmd! {
+    /// Write Synchronous Flow Control Enable command [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-0cd849cb-ca78-b838-991e-9a45e100f83f)
+    WriteSynchronousFlowControlEnable(CONTROL_BASEBAND, 0x002f) {
+        WriteSynchronousFlowControlEnableParams {
+            enable: bool,
+        }
+        Return = ();
     }
 }
 
