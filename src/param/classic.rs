@@ -353,6 +353,20 @@ param! {
 }
 
 param! {
+    enum ScanEnableType {
+        /// No scanning
+        NoScanning = 0x00,
+        /// Inquiry scan enabled, page scan disabled
+        InquiryScanEnabled = 0x01,
+        /// Page scan enabled, inquiry scan disabled
+        PageScanEnabled = 0x02,
+        /// Inquiry and page scan enabled
+        InquiryAndPageScanEnabled = 0x03,
+        // All other values reserved for future use
+    }
+}
+
+param! {
     /// Separate params for the Enhanced Setup Synchronous Connection command since they have too many fields
     struct EnhancedSetupSynchronousConnectionParams {
         handle: ConnHandle,

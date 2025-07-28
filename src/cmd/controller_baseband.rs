@@ -1,9 +1,11 @@
 //! Controller & Baseband commands [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-5ced811b-a6ce-701a-16b2-70f2d9795c05)
 
+extern crate alloc;
+
 use crate::cmd;
 use crate::param::{
     BdAddr, ConnHandle, ConnHandleCompletedPackets, ControllerToHostFlowControl, Duration, EventMask, EventMaskPage2,
-    FilterConditionType, FilterType, PinType, PowerLevelKind,
+    FilterConditionType, FilterType, PinType, PowerLevelKind, ScanEnableType,
 };
 
 // Ox001 - 0x00f
@@ -81,9 +83,168 @@ cmd! {
     }
 }
 
-// 0x011 - 0x01f
+// 0x01 - 0x01f
 
-// 0x021 - 0x02f
+// TODO: find a way to have bytes in Params
+// cmd! {
+//     /// Write Stored Link Key command [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-bfff869a-4d6f-62dd-439d-249db64ddf75)
+//     WriteStoredLinkKey(CONTROL_BASEBAND, 0x0011) {
+//         WriteStoredLinkKeyParams<'a> {
+//             num_keys_to_write: u8,
+//             bytes: &'a [u8], // bd_addr * num_keys_to_write + link_key * num_keys_to_write
+//         }
+//         WriteStoredLinkKeyReturn {
+//             num_keys_written: u8,
+//         }
+//     }
+// }
+
+cmd! {
+    /// Delete Stored Link Key command [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-f81b6bd8-b4c1-38c5-ebf4-6a87e8e2da0e)
+    DeleteStoredLinkKey(CONTROL_BASEBAND, 0x0012) {
+        DeleteStoredLinkKeyParams {
+            bd_addr: BdAddr,
+            delete_all: bool,
+        }
+        DeleteStoredLinkKeyReturn {
+            num_keys_deleted: u16,
+        }
+    }
+}
+
+cmd! {
+    /// Write Local Name command [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-fad54669-572b-c043-1111-d6adf22683f3)
+    WriteLocalName(CONTROL_BASEBAND, 0x0013) {
+        WriteLocalNameParams {
+            local_name: [u8; 248],
+        }
+        Return = ();
+    }
+}
+
+cmd! {
+    /// Read Local Name command [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-aeec56fa-a1cc-f66a-a618-a8db81c2f015)
+    ReadLocalName(CONTROL_BASEBAND, 0x0014) {
+        Params = ();
+        ReadLocalNameReturn {
+            local_name: [u8; 248],
+        }
+    }
+}
+
+cmd! {
+    /// Read Connection Accept Timeout command [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-c273cd12-19e3-f637-987e-c7c2f6f1f334)
+    ReadConnectionAcceptTimeout(CONTROL_BASEBAND, 0x0015) {
+        Params = ();
+        ReadConnectionAcceptTimeoutReturn {
+            connection_accept_timeout: u16,
+        }
+    }
+}
+
+cmd! {
+    /// Write Connection Accept Timeout command [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-70c4664c-429c-c90d-2acf-7af43001c656)
+    WriteConnectionAcceptTimeout(CONTROL_BASEBAND, 0x0016) {
+        WriteConnectionAcceptTimeoutParams {
+            timeout: u16,
+        }
+        Return = ();
+    }
+}
+
+cmd! {
+    /// Read Page Timeout command [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-82a71218-d204-032b-1c5e-3987279e2974)
+    ReadPageTimeout(CONTROL_BASEBAND, 0x0017) {
+        Params = ();
+        ReadPageTimeoutReturn {
+            timeout: u16,
+        }
+    }
+}
+
+cmd! {
+    /// Write Page Timeout command [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-2eb95f10-ba07-d921-6e55-09d1c7e05497)
+    WritePageTimeout(CONTROL_BASEBAND, 0x0018) {
+        WritePageTimeoutParams {
+            timeout: u16,
+        }
+        Return = ();
+    }
+}
+
+cmd! {
+    /// Read Scan Enable command [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-e46d5878-1baf-2a4a-92e3-5b6130d75e7e)
+    ReadScanEnable(CONTROL_BASEBAND, 0x0019) {
+        Params = ();
+        Return = ScanEnableType;
+    }
+}
+
+cmd! {
+    /// Write Scan Enable command [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-8c654259-b582-4d20-f77b-17e76113f8b7)
+    WriteScanEnable(CONTROL_BASEBAND, 0x001A) {
+        WriteScanEnableParams {
+            scan_enable: ScanEnableType,
+        }
+        Return = ();
+    }
+}
+
+cmd! {
+    /// Read Page Scan Activity command [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-ca36fe19-9b44-b57e-ba86-41fc4a5eeca8)
+    ReadPageScanActivity(CONTROL_BASEBAND, 0x001B) {
+        Params = ();
+        ReadPageScanActivityReturn {
+            interval: u16,
+            window: u16,
+        }
+    }
+}
+
+cmd! {
+    /// Write Page Scan Activity command [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-d170e27f-8068-9bae-7322-4c89b4b960db)
+    WritePageScanActivity(CONTROL_BASEBAND, 0x001c) {
+        WritePageScanActivityParams {
+            interval: u16,
+            window: u16,
+        }
+        Return = ();
+    }
+}
+
+cmd! {
+    /// Read Inquiry Scan Activity command [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-91e26f9e-c3a3-778e-0cec-909cae0d452a)
+    ReadInquiryScanActivity(CONTROL_BASEBAND, 0x001d) {
+        Params = ();
+        ReadInquiryScanActivityReturn {
+            interval: u16,
+            window: u16,
+        }
+    }
+}
+
+cmd! {
+    /// Write Inquiry Scan Activity command [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-276bb784-86fb-f4d5-f1d3-71c818013ad6)
+    WriteInquiryScanActivity(CONTROL_BASEBAND, 0x001e) {
+        WriteInquiryScanActivityParams {
+            interval: u16,
+            window: u16,
+        }
+        Return = ();
+    }
+}
+
+cmd! {
+    /// Read Authentication Enable command [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-98044474-c5bc-831e-ac2c-5529c4d3fc5b)
+    ReadAuthenticationEnable(CONTROL_BASEBAND, 0x001f) {
+        Params = ();
+        ReadAuthenticationEnableReturn {
+            enable: bool,
+        }
+    }
+}
+
+// 0x020 - 0x02f
 
 cmd! {
     /// Read Transmit Power Level command [📖](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host-controller-interface/host-controller-interface-functional-specification.html#UUID-7205a3ee-15c7-cc48-c512-a959b4e3f560)
@@ -172,8 +333,8 @@ cmd! {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::param::{BdAddr, EventMask, FilterConditionType, FilterType, PinType};
-    use crate::AsHciBytes;
+    use crate::param::*;
+    use crate::*;
 
     #[test]
     fn test_set_event_mask_params() {
@@ -231,5 +392,103 @@ mod tests {
         let bytes = params.as_hci_bytes();
         assert_eq!(bytes[0..6], [1, 2, 3, 4, 5, 6]);
         assert_eq!(bytes[6], 0x00);
+    }
+
+    #[test]
+    fn test_delete_stored_link_key_params() {
+        let params = DeleteStoredLinkKeyParams {
+            bd_addr: BdAddr::new([1, 2, 3, 4, 5, 6]),
+            delete_all: false,
+        };
+        let bytes = params.as_hci_bytes();
+        assert_eq!(&bytes[0..6], &[1, 2, 3, 4, 5, 6]);
+        assert_eq!(bytes[6], 0x00);
+    }
+
+    #[test]
+    fn test_write_local_name_params() {
+        let mut name = [0u8; 248];
+        name[0..4].copy_from_slice(b"Test");
+        let params = WriteLocalNameParams { local_name: name };
+        let bytes = params.as_hci_bytes();
+        assert_eq!(&bytes[0..4], b"Test");
+        assert_eq!(bytes.len(), 248);
+    }
+
+    #[test]
+    fn test_read_local_name_return() {
+        let ret = ReadLocalNameReturn {
+            local_name: [0x42; 248],
+        };
+        let bytes = ret.as_hci_bytes();
+        assert_eq!(bytes, [0x42; 248]);
+    }
+
+    #[test]
+    fn test_read_connection_accept_timeout_return() {
+        let ret = ReadConnectionAcceptTimeoutReturn {
+            connection_accept_timeout: 0x1234,
+        };
+        let bytes = ret.as_hci_bytes();
+        assert_eq!(bytes, [0x34, 0x12]);
+    }
+
+    #[test]
+    fn test_write_connection_accept_timeout_params() {
+        let params = WriteConnectionAcceptTimeoutParams { timeout: 0x1FA0 };
+        let bytes = params.as_hci_bytes();
+        assert_eq!(bytes, [0xA0, 0x1F]);
+    }
+
+    #[test]
+    fn test_read_page_timeout_return() {
+        let ret = ReadPageTimeoutReturn { timeout: 0x2000 };
+        let bytes = ret.as_hci_bytes();
+        assert_eq!(bytes, [0x00, 0x20]);
+    }
+
+    #[test]
+    fn test_write_page_timeout_params() {
+        let params = WritePageTimeoutParams { timeout: 0x2000 };
+        let bytes = params.as_hci_bytes();
+        assert_eq!(bytes, [0x00, 0x20]);
+    }
+
+    #[test]
+    fn test_write_scan_enable_params() {
+        let params = WriteScanEnableParams {
+            scan_enable: ScanEnableType::InquiryAndPageScanEnabled,
+        };
+        let bytes = params.as_hci_bytes();
+        assert_eq!(bytes, [0x03]);
+    }
+
+    #[test]
+    fn test_write_page_scan_activity_params() {
+        let params = WritePageScanActivityParams {
+            interval: 0x100,
+            window: 0x80,
+        };
+        let bytes = params.as_hci_bytes();
+        assert_eq!(bytes, [0x00, 0x01, 0x80, 0x00]);
+    }
+
+    #[test]
+    fn test_write_inquiry_scan_activity_params() {
+        let params = WriteInquiryScanActivityParams {
+            inquiry_scan_interval: 0x100,
+            inquiry_scan_window: 0x80,
+        };
+        let bytes = params.as_hci_bytes();
+        assert_eq!(bytes, [0x00, 0x01, 0x80, 0x00]);
+    }
+
+    #[test]
+    fn test_read_authentication_enable_return() {
+        let ret = ReadAuthenticationEnableReturn {
+            authentication_enable: true,
+        };
+        let bytes = ret.as_hci_bytes();
+        assert_eq!(bytes, [0x01]);
     }
 }
