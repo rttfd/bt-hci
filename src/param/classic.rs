@@ -317,6 +317,42 @@ param! {
 }
 
 param! {
+    enum FilterType {
+        /// Clear all filters
+        ClearAll = 0x00,
+        /// Inquiry Result filter
+        InquiryResult = 0x01,
+        /// Connection Setup filter
+        ConnectionSetup = 0x02,
+        // All other values reserved for future use
+    }
+}
+
+param! {
+    enum FilterConditionType {
+        /// InquiryResult: Return responses from all devices during the Inquiry process.
+        /// ConnectionSetup: Allow Connections from all devices.
+        All = 0x00,
+        /// InquiryResult: Return responses from devices matching the Class of Device.
+        /// ConnectionSetup: Allow Connections from devices matching the Class of Device.
+        ClassOfDevice = 0x01,
+        /// InquiryResult: Return responses from the device with the specified BD_ADDR.
+        /// ConnectionSetup: Allow Connections from the device with the specified BD_ADDR.
+        BdAddr = 0x02,
+        // All other values reserved for future use
+    }
+}
+
+param! {
+    enum PinType{
+        /// Variable PIN
+        Variable = 0x00,
+        /// Fixed PIN
+        Fixed = 0x01,
+    }
+}
+
+param! {
     /// Separate params for the Enhanced Setup Synchronous Connection command since they have too many fields
     struct EnhancedSetupSynchronousConnectionParams {
         handle: ConnHandle,
